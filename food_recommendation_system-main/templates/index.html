@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recipe Recommendation System</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Hide login and register links */
+        nav a[href*="login"], nav a[href*="register"] {
+            display: none !important;
+        }
+
+        /* Background styling */
+        body {
+            background-image: url('https://img.freepik.com/free-vector/fruit-vegetables-background-design_23-2148507118.jpg?size=626&ext=jpg&ga=GA1.1.1548078206.1725893974&semt=ais_hybrid');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #333;
+        }
+
+        /* Form container styling */
+        .form-container {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(15px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+
+        /* Header styling */
+        .header-title {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 2.5rem;
+            color: #2c3e50;
+            text-shadow: 1px 1px 3px rgba(255, 255, 255, 0.8);
+        }
+
+        /* Button styling */
+        .btn-primary {
+            background-color: #2980b9;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #3498db;
+        }
+
+        /* Recipe card styling */
+        .recipe-card {
+            position: relative;
+            overflow: hidden;
+            margin: 10px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .recipe-image {
+            max-height: 150px;
+            object-fit: cover;
+        }
+
+        .ingredients {
+            padding: 10px;
+            border-top: 1px solid #ddd;
+            z-index: 1;
+            font-size: 14px;
+        }
+
+        .recommendations-container {
+            min-height: 300px;
+            margin-top: 30px;
+        }
+
+        /* Hide nutritional fields if ingredient-only option is selected */
+        .hidden {
+            display: none;
+        }
+    </style>
+
+    <script>
+        function toggleFields() {
+            const nutritionalFields = document.getElementById('nutritional-fields');
+            const ingredientOnly = document.getElementById('ingredientOnly').checked;
+            nutritionalFields.style.display = ingredientOnly ? 'none' : 'block';
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <header class="text-center mb-4">
+            <h1 class="header-title">Recipe Recommendation System</h1>
+        </header>
+
+        <div class="row">
+            <!-- Form Section -->
+            <div class="col-md-6">
+                <div class="form-container">
+                    <form method="post" class="mt-4">
+                        <div class="form-group">
+                            <label for="option">Choose your option:</label><br>
+                            <input type="radio" id="fullOption" name="option" value="full" checked onclick="toggleFields()"> Input Nutritional Values<br>
+                            <input type="radio" id="ingredientOnly" name="option" value="ingredients" onclick="toggleFields()"> Only Ingredients<br>
+                        </div>
+
+                        <!-- Nutritional Fields -->
+                        <div id="nutritional-fields">
+                            <div class="form-row">
+                                <div class="form-group col-md-6">
+                                    <label for="calories">Calories (kcal)</label>
+                                    <input type="number" class="form-control" id="calories" name="calories" step="any">
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="fat">Fat (g)</label>
+                                    <input type="number" class="form-control" id="fat" name="fat" step="any">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group col-md-6">
+                                    <label for="carbohydrates">Carbohydrates (g)</label>
+                                    <input type="number" class="form-control" id="carbohydrates" name="carbohydrates" step="any">
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="protein">Protein (g)</label>
+                                    <input type="number" class="form-control" id="protein" name="protein" step="any">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group col-md-6">
+                                    <label for="cholesterol">Cholesterol (mg)</label>
+                                    <input type="number" class="form-control" id="cholesterol" name="cholesterol" step="any">
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="sodium">Sodium (mg)</label>
+                                    <input type="number" class="form-control" id="sodium" name="sodium" step="any">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="fiber">Fiber (g)</label>
+                                <input type="number" class="form-control" id="fiber" name="fiber" step="any">
+                            </div>
+                        </div>
+
+                        <!-- Ingredients Field -->
+                        <div class="form-group">
+                            <label for="ingredients">Ingredients</label>
+                            <input type="text" class="form-control" id="ingredients" name="ingredients" required>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Get Recommendations</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Recipe Recommendations Section -->
+            <div class="col-md-6 recommendations-container">
+                <div class="mt-5">
+                    <h2>Recommended Recipes</h2>
+                    <div class="row">
+                        {% if recommendations %}
+                        {% for recipe in recommendations %}
+                        <div class="col-md-6">
+                            <div class="card recipe-card">
+                                <img class="card-img-top recipe-image" src="{{ recipe.image_url }}" alt="{{ recipe.recipe_name }}">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ recipe.recipe_name }}</h5>
+                                    <div class="ingredients">
+                                        <strong>Ingredients:</strong> {{ recipe.ingredients_list|join(', ') }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        {% else %}
+                        <div class="col-12">
+                            <p>No recommendations available. Please enter your ingredients and nutritional values.</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
